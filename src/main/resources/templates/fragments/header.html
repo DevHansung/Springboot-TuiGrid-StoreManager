@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+	<th:block th:fragment="headerFragment">
+	    <head>
+	        <meta charset="UTF-8"/>
+	        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	         <meta http-equiv="x-ua-compatible" content="ie=edge">
+	        <title>StoreKeeper</title>
+	        <link rel="logo icon" type="image/x-icon" th:href="@{/adminlte/dist/img/logo.png}">
+	        
+	        <!-- custom and bootstrap css -->
+	        <link rel="stylesheet" th:href="@{/css/layout.css}">	   	
+	    	<!-- Font Awesome Icons -->
+  			<link rel="stylesheet" th:href="@{/adminlte/plugins/fontawesome-free/css/all.min.css}">
+  			<!-- Theme style -->
+  			<link rel="stylesheet" th:href="@{/adminlte/dist/css/adminlte.min.css}">
+  			<!-- Google Font: Source Sans Pro -->
+  			<link th:href="@{https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700}" rel="stylesheet">   
+	        <!-- tui-grid css_cdn -->
+	    	<!-- <link rel="stylesheet" th:href="@{https://uicdn.toast.com/tui-grid/latest/tui-grid.css}" />  -->
+			<!-- <link rel="stylesheet" type="text/css" th:href="@{https://uicdn.toast.com/tui.pagination/v3.3.0/tui-pagination.css}" /> -->	
+			<!-- tui-grid css -->
+  			<link rel="stylesheet" th:href="@{/toastui/tui-grid/css/tui-grid.css}">
+  			<link rel="stylesheet" th:href="@{/toastui/tui-pagination/css/tui-pagination.css}">	
+			<!-- jquary ui-datepic -->
+  			<link rel="stylesheet" th:href="@{/adminlte/plugins/jquery-ui/jquery-ui.min.css}">
+
+	    	<!-- jQuery -->
+			<script src="/adminlte/plugins/jquery/jquery.min.js"></script>
+			<!-- Bootstrap 4 -->
+			<script src="/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+			<!-- AdminLTE App -->
+			<script src="/adminlte/dist/js/adminlte.min.js"></script>
+			<!-- tui-grid script_cdn -->	
+			<!-- <script src="https://uicdn.toast.com/tui.code-snippet/v1.5.0/tui-code-snippet.js"></script> -->
+			<!-- <script src="https://uicdn.toast.com/tui.pagination/v3.3.0/tui-pagination.js"></script> -->	
+			<!-- <script src="https://uicdn.toast.com/tui-grid/latest/tui-grid.js"></script> -->			
+	        <!-- tui-grid script -->	
+			<script src="/toastui/tui-code-snippet/js/tui-code-snippet.js"></script>
+			<script src="/toastui/tui-pagination/js/tui-pagination.js"></script>
+			<script src="/toastui/tui-grid/js/tui-grid.js"></script>
+			<!-- jquary ui-datepic -->
+			<script src="/adminlte/plugins/jquery-ui/jquery-ui.min.js"></script>
+	    </head>
+	</th:block>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	layout:decorator="layout/layout">
+
+<th:block layout:fragment="content">
+	<div class="container">
+		<h3>발주 신청</h3>
+
+		<div class="custom-search-box">
+			<table class="table-xs table-bordered" style="width: 100%">
+		      <tr>
+		        <td class="table-secondary">
+		        	<span style="font-weight: bold;">품번 검색</span>
+		        </td>
+		        <td>
+			        <div class="input-group" style="width: 347px;">
+						<input style="height: 30px" autocomplete="off" type="text" class="form-control input-xs" id="productCode" placeholder="제품코드를 입력하세요.">
+			  			<span  class="input-group-btn">
+							<button class="btn btn-secondary btn-xs" id="findProductByProductCode" type="button">추가</button> 
+			  			</span>
+					</div>
+		        </td>
+		      </tr>
+		      <tr>
+		        <td class="table-secondary">
+		        	<span style="font-weight: bold;">품명 검색</span>
+		        </td>
+		        <td>
+			        <div class="input-group" style="width: 347px;">
+						<input style="height: 30px" autocomplete="off" type="text" class="form-control input-xs" id="productName" placeholder="제품명을 입력하세요.">
+			  			<span  class="input-group-btn">
+							<button class="btn btn-secondary btn-xs" id="findProductByProductName" type="button">검색</button> 
+			  			</span>
+					</div>
+		        </td>
+		      </tr>	
+	  		</table>
+		</div>
+		<div style="margin-bottom: 3px;">
+			<button class="btn btn-warning btn-xs" id="removeBtn">선택 행 삭제</button>
+			<button class="btn btn-success btn-xs" id="createBtn">동기화</button>			
+  		</div>
+		<div id="grid"></div>
+		<p style="font-size: 11px;">
+		   <strong>※발주 신청 후 발주관리 항목에서 주문상태를 '수령'으로 변경해야 해당 항목의 데이터가 재고에 반영 됩니다.</strong><br/>		
+		         ※작업을 완료하여 데이터 변경사항 발생시 동기화 버튼을 눌러야 서버에 저장됩니다.<br/>
+		         ※작업 중 동기화 버튼을 누르지 않은 상태로 창을 닫거나 페이지이동 혹은 새로고침 하게되면 데이터가 저장되지 않습니다.<br/>
+		         ※다수의 행을 변경 후 동기화 할때 한 행에 문제가 있을경우 데이터의 일관성 유지를 위해 모든 행의 정보가 서버에 반영되지 않습니다.<br/>
+		         ※데이터 손실을 방지하기위하여 행 단위로 작업이 완료 될때마다 데이터를 동기화 시키는것을 추천합니다.</p>
+	</div>
+	<script>
+		window.onload = function() {
+			const grid = new tui.Grid({
+				el : document.getElementById('grid'),
+				data: {
+					api: {
+						readData: {url: '',method: 'GET'},
+						createData: { url: '/order/insertOrder', method: 'POST' },
+					},
+					initialRequest: false,
+					contentType: 'application/json'
+				},
+				scrollX : true,
+				scrollY : true,
+			    minBodyHeight: 30,
+			    rowHeaders: ['checkbox'],
+			    pageOptions: {
+			      useClient: true,
+			      perPage: 10
+			    },
+				columns : [ {
+					header : '제품번호',
+					name : 'productCode',
+			        align: "center",
+			        width: 130,
+			        filter: {
+			         	type: 'text',
+			         	operator: 'OR'
+			       	}
+				}, {
+					header : '제품명',
+					name : 'productName',
+			        align: "center",
+			        width: 160,
+			        filter: {
+			         	type: 'text',
+			       	}
+				}, {
+					header : '분류',
+					name : 'productType',
+			        align: "center",
+			        width: 90,
+			        filter: {
+			         	type: 'text',
+			       	}
+				}, {
+					header : 'COLOR',
+					name : 'productColor',
+			        align: "center",
+			        width: 100,
+			        filter: {
+			         	type: 'text',
+			         	operator: 'OR'
+			       	}
+				}, {
+					header : 'SIZE',
+					name : 'productSize',
+			        align: "center",
+			        width: 60,
+			        filter: {
+			         	type: 'text',
+			         	operator: 'OR'
+			       	}
+				}, {
+					header : '판매단가',
+					name : 'productSellingPrice',
+			        align: "center",
+			        width: 80,
+			        sortingType: 'desc',
+			        sortable: true,
+		            formatter: ({value}) => {
+		            	 result = Number(value);
+		            	 return result.toLocaleString();
+		            }
+
+				}, {
+					header : '매입단가',
+					name : 'productPurchasePrice',
+			        align: "center",
+			        width: 80,
+			        sortingType: 'desc',
+			        sortable: true,
+		            formatter: ({value}) => {
+		            	 result = Number(value);
+		            	 return result.toLocaleString();
+		            }
+				}, {
+					header : '주문수량',
+					name : 'orderQuantity',
+			        align: "center",
+			        width: 80,
+			        sortingType: 'desc',
+			        sortable: true,
+				    editor: 'text',
+				    onAfterChange: (value) => {
+				    	const row = grid.getRow(value.rowKey)
+				    	grid.setValue(value.rowKey, 'orderPrice', row.productPurchasePrice * row.orderQuantity)
+				    }
+				}, {
+					header : '주문가격',
+					name : 'orderPrice',
+			        align: "center",
+			        width: 125,
+			        sortingType: 'desc',
+			        sortable: true,
+		            formatter: ({value}) => {
+		            	return value.toLocaleString();
+		            }
+				}, {
+					header : '주문상태',
+					name : 'orderState',
+			        align: "center",
+			        width: 80,
+			        sortingType: 'desc',
+			        sortable: true
+				}, {
+					header : '주문지점',
+					name : 'orderBranch',
+			        align: "center",
+			        width: 80,
+			        sortingType: 'desc',
+			        sortable: true
+				} ],
+				summary: {
+			        height: 40,
+			        position: 'bottom',
+			        columnContent: {
+			        	productPurchasePrice: {
+				            template: () => {
+				              return `합계:`;
+				            },
+			        	},
+			        	orderQuantity: {
+				            template: (valueMap) => {
+				              return `${valueMap.sum} 개`;
+				            },
+			        	},
+			        	orderPrice: {
+				            template: (valueMap) => {
+				              return `${valueMap.sum.toLocaleString()} 원`;
+				            }
+			          	}
+			        }
+				}
+			});     
+
+			const Grid = tui.Grid;
+			Grid.setLanguage('en');
+			Grid.setLanguage('ko');
+			Grid.setLanguage('en-US', {
+			     display: {
+			         noData: 'No data.',
+			         loadingData: 'Loading data.',
+			     },
+			     net: {
+				     //confirmModify: '확인 버튼을 누르면 {{count}}개의 수정된 행을 동기화 시킵니다.',
+					 confirmDelete: '확인 버튼을 누르면 {{count}}개의 행을 제거합니다.',
+				     confirmCreate: '확인 버튼을 누르면 {{count}}개의 생성된 행을 동기화 시킵니다.',
+				     noDataToModify: '변동된 데이터가 없습니다.',
+				     failResponse: '데이터 요청 중에 에러가 발생하였습니다.\n다시 시도하여 주시기 바랍니다.'
+			     }
+			});
+			
+			findProductByProductCode.addEventListener('click', () => {
+				var header = $("meta[name='_csrf_header']").attr("content");
+				var productCode = $("#productCode").val();
+				var regExp = /\s/g;
+				if(regExp.test(productCode)){
+	                alert('제품코드에 공백을 제거해 주세요.');
+	                return
+				}
+				if(productCode == ''){
+	                alert('제품코드를 입력 해 주세요.');
+	                return
+				}
+				var jsonData = {
+					"productCode" : productCode
+				}
+				$.ajax({
+					url : "/order/searchProductCode",
+					type : "POST",
+					data: JSON.stringify(jsonData),
+					contentType: 'application/json',
+					success : function(result) {
+				        grid.prependRow({
+				        	productCode: result.productCode,
+				    		productName: result.productName,
+				    		productType: result.productType,
+				    		productColor: result.productColor,
+				    		productSize: result.productSize,
+				    		productPurchasePrice: result.productPurchasePrice,
+				    		productSellingPrice: result.productSellingPrice,
+				    		orderState: '주문',
+				    		orderBranch: '[[${session.branch}]]'
+				        });
+					},
+			        error: function(jqXHR, exception){
+			            if (jqXHR.status == 400) {
+			                alert(jqXHR.responseText);
+			            } else
+			            	alert("error")
+			        }
+				});
+		      });
+			
+			findProductByProductName.addEventListener('click', () => {
+				var header = $("meta[name='_csrf_header']").attr("content");
+				var productName = $("#productName").val();
+				var regExp = /\s/g;
+				if(regExp.test(productName)){
+	                alert('제품명에 공백을 제거해 주세요.');
+	                return
+				}
+				if(productName == ''){
+	                alert('제품명을 입력 해 주세요.');
+	                return
+				}
+				var jsonData = {
+					"productName" : productName
+				}
+				$.ajax({
+					url : "/order/searchProductName",
+					type : "POST",
+					data: JSON.stringify(jsonData),
+					contentType: 'application/json',
+					success : function(result) {
+				        grid.prependRow({
+				        	productCode: result.productCode,
+				    		productName: result.productName,
+				    		productType: result.productType,
+				    		productColor: result.productColor,
+				    		productSize: result.productSize,
+				    		productPurchasePrice: result.productPurchasePrice,
+				    		productSellingPrice: result.productSellingPrice,
+				    		orderState: '주문',
+				    		orderBranch: '[[${session.branch}]]'
+				        });
+					},
+			        error: function(jqXHR, exception){
+			            if (jqXHR.status == 400) {
+			                alert(jqXHR.responseText);
+			            } else
+			            	alert("error")
+			        }
+				});
+		      });
+			
+		      /////autocomplete start/////			
+		      $(function() {
+		          $("#productCode").autocomplete({
+		              source : function( request, response ) {
+						   var jsonData = {
+							   "input" : request.term
+						   }
+		                   $.ajax({
+		                          url: "/order/autoCompleteProductCode",
+		                          type: 'POST',
+		                          dataType: "json",
+		      					  contentType: 'application/json',
+		      					  data: JSON.stringify(jsonData),
+		                          success: function(data) {
+		                              response(
+		                                  $.map(data, function(item) {
+		                                      return {
+		                                          label: item,
+		                                          value: item
+		                                      }
+		                                  })
+		                              );
+		                          }
+		                   });
+		              },
+		              focus : function(event, ui) {
+		                  return false;
+		              },
+		              minLength: 1,
+		              autoFocus: true,
+		              delay: 100
+		          });
+		          $("#productName").autocomplete({
+		              source : function( request, response ) {
+						   var jsonData = {
+							   "input" : request.term
+						   }
+		                   $.ajax({
+		                          url: "/order/autoCompleteProductName",
+		                          type: 'POST',
+		                          dataType: "json",
+		      					  contentType: 'application/json',
+		      					  data: JSON.stringify(jsonData),
+		                          success: function(data) {
+		                              response(
+		                                  $.map(data, function(item) {
+		                                      return {
+		                                          label: item,
+		                                          value: item
+		                                      }
+		                                  })
+		                              );
+		                          }
+		                   });
+		              },
+		              focus : function(event, ui) {
+		                  return false;
+		              },
+		              minLength: 1,
+		              autoFocus: true,
+		              delay: 100
+		         });  
+		    });
+		    /////autocomplete end/////
+			 
+			createBtn.addEventListener('click', () => {
+		    	grid.request('createData');
+		      });
+			removeBtn.addEventListener('click', () => {
+		        grid.removeCheckedRows (true);
+		      });
+		}
+	</script>
+</th:block>
+</html>

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	layout:decorator="layout/layout">
+
+<th:block layout:fragment="content">
+	<div class="container">
+		<h3>제품 관리</h3>
+		
+		<div class="custom-search-box">
+			<table class="table-xs table-bordered" style="width: 100%">
+		      <tr>
+		        <td class="table-secondary">
+		        	<span style="font-weight: bold;">품번 검색</span>
+		        </td>
+		        <td>
+			        <div class="input-group" style="width: 347px;">
+						<input style="height: 30px" autocomplete="off" type="text" class="form-control input-xs" id="productCode" placeholder="제품코드를 입력하세요.">
+			  			<span  class="input-group-btn">
+							<button class="btn btn-secondary btn-xs" id="findProductByProductCode" type="button">검색</button> 
+			  			</span>
+					</div>
+		        </td>
+		      </tr>
+			  <tr>
+		        <td class="table-secondary">
+		        	<span style="font-weight: bold;">품명 검색</span>
+		        </td>
+		        <td>
+			        <div class="input-group" style="width: 347px;">
+						<input style="height: 30px" autocomplete="off" type="text" class="form-control input-xs" id="productName" placeholder="제품명을 입력하세요.">
+			  			<span  class="input-group-btn">
+							<button class="btn btn-secondary btn-xs" id="findProductByProductName" type="button">검색</button> 
+			  			</span>
+					</div>
+		        </td>
+		      </tr>		      
+		      <tr>
+		        <td class="table-secondary">
+		        	<span style="font-weight: bold;">날자 검색</span>
+		        </td>
+		        <td>
+					<div id="datePic">
+						<input autocomplete="off" type="text" id="startDate" name="startDate" readonly>
+						~
+						<input autocomplete="off" type="text" id="endDate" name="endDate" readonly>
+						<button class="btn btn-xs btn-secondary" id="findProductByDate" type="button">검색</button>
+						<span style="font-size: 10px;">※시작일로부터 최대 3개월(90일) 이전 까지만 조회 가능합니다.</span>
+					</div>
+		        </td>
+		      </tr>
+	  		</table>
+		</div>
+		
+		<div style="margin-bottom: 3px;">
+			<button class="btn btn-info btn-xs" id="appendBtn">행 추가</button>
+			<button class="btn btn-warning btn-xs" id="removeBtn">선택 행 삭제</button>
+			<button class="btn btn-success btn-xs" id="modifyBtn">동기화</button>
+		</div>
+		<div id="grid"></div>
+		<p style="font-size: 11px;">
+		         ※작업을 완료하여 데이터 변경사항 발생시 동기화 버튼을 눌러야 서버에 저장됩니다.<br/>
+		         ※작업 중 동기화 버튼을 누르지 않은 상태로 창을 닫거나 페이지이동 혹은 새로고침 하게되면 데이터가 저장되지 않습니다.<br/>
+		         ※다수의 행을 변경 후 동기화 할때 한 행에 문제가 있을경우 데이터의 일관성 유지를 위해 모든 행의 정보가 서버에 반영되지 않습니다.<br/>
+		         ※데이터 손실을 방지하기위하여 행 단위로 작업이 완료 될때마다 데이터를 동기화 시키는것을 추천합니다.</p>
+	</div>
+	<script>
+		window.onload = function() {
+			const grid = new tui.Grid({
+				el : document.getElementById('grid'),
+				data: {
+					api: {
+						readData: {url: '/productManagement/productList',method: 'GET'},
+					    modifyData: { url: '/productManagement/productList', method: 'POST' },
+					    createData: { url: '/productManagement/productList', method: 'POST' },
+					    updateData: { url: '/productManagement/productList', method: 'PUT' },
+					    deleteData: { url: '/productManagement/productList', method: 'DELETE' }
+					},
+					contentType: 'application/json'
+				},
+				scrollX : true,
+				scrollY : true,
+			    minBodyHeight: 30,
+			    rowHeaders: ['checkbox'],
+			    pageOptions: {
+			      useClient: true,
+			      perPage: 10
+			    },
+				columns : [{
+					header : 'SEQ',
+					name : 'productSeq',
+			        align: "center",
+			        width: 50,
+			        sortingType: 'desc',
+			        sortable: true
+				}, {
+					header : '제품번호(unique)',
+					name : 'productCode',
+			        align: "center",
+			        width: 160,
+				    editor: 'text',
+				    validation: {
+				        dataType: 'text',
+				        unique: true
+				    },
+				    onBeforeChange: (ev) => {
+				      var tmp = ev.nextValue.replace(/\s|　/gi, '');
+				      if(tmp != ''){
+				        ev.value = ev.nextValue;
+				        return ev;
+				      }else{
+				        return ev.stop();
+				      }
+				    },
+			        filter: {
+			         	type: 'text',
+			         	operator: 'OR'
+			       	}
+				}, {
+					header : '제품명',
+					name : 'productName',
+			        align: "center",
+			        width: 160,
+				    editor: 'text',
+				    validation: {
+				        dataType: 'text'
+				    },
+				    onBeforeChange: (ev) => {
+					  var tmp = ev.nextValue.replace(/\s|　/gi, '');
+				      if(tmp != ''){
+				        ev.value = ev.nextValue;
+				        return ev;
+				      }else{
+				        return ev.stop();
+				      }
+				    },
+			        filter: {
+			         	type: 'text',
+			       	}
+				}, {
+					header : '제품분류',
+					name : 'productType',
+			        align: "center",
+			        width: 130,
+				    editor: 'text',
+				    validation: {
+				        dataType: 'text'
+				    },
+				    onBeforeChange: (ev) => {
+				 	  var tmp = ev.nextValue.replace(/\s|　/gi, '');
+				      if(tmp != ''){
+				        ev.value = ev.nextValue;
+				        return ev;
+				      }else{
+				        return ev.stop();
+				      }
+				    },
+			        filter: {
+			         	type: 'text',
+			       	}
+				}, {
+					header : 'COLOR',
+					name : 'productColor',
+			        align: "center",
+			        width: 120,
+				    editor: 'text',
+				    validation: {
+				        dataType: 'text'
+				    },
+				    onBeforeChange: (ev) => {
+					  var tmp = ev.nextValue.replace(/\s|　/gi, '');
+				      if(tmp != ''){
+				        ev.value = ev.nextValue;
+				        return ev;
+				      }else{
+				        return ev.stop();
+				      }
+				    },
+			        filter: {
+			         	type: 'text',
+			         	operator: 'OR'
+			       	}
+				}, {
+					header : 'SIZE',
+					name : 'productSize',
+			        align: "center",
+			        width: 100,
+				    editor: 'text',
+				    validation: {
+				        dataType: 'text'
+				    },
+				    onBeforeChange: (ev) => {
+					  var tmp = ev.nextValue.replace(/\s|　/gi, '');	
+				      if(tmp != ''){
+				        ev.value = ev.nextValue;
+				        return ev;
+				      }else{
+				        return ev.stop();
+				      }
+				    },
+			        filter: {
+			         	type: 'text',
+			         	operator: 'OR'
+			       	}
+				}, {
+					header : '매입단가',
+					name : 'productPurchasePrice',
+			        align: "center",
+			        width: 100,
+			        sortingType: 'desc',
+			        sortable: true,
+				    editor: 'text',
+				    validation: {
+				        required: true,
+				        dataType: 'number'
+				    },
+				    defaultValue: 111,
+				    onBeforeChange: (ev) => {
+				      if(Number(ev.nextValue)){
+				        ev.value = Number(ev.nextValue);
+				        return ev;
+				      }else{
+				        return ev.stop();
+				      }
+				    },
+		            formatter: ({value}) => {
+		            	 result = Number(value);
+		            	 return result.toLocaleString();
+		            }
+				}, {
+					header : '판매단가',
+					name : 'productSellingPrice',
+			        align: "center",
+			        width: 100,
+			        sortingType: 'desc',
+			        sortable: true,
+				    editor: 'text',
+				    validation: {
+				        required: true,
+				        dataType: 'number'
+				    },
+				    onBeforeChange: (ev) => {
+				      if(Number(ev.nextValue)){
+				        ev.value = Number(ev.nextValue);
+				        return ev;
+				      }else{
+				        return ev.stop();
+				      }
+				    },
+		            formatter: ({value}) => {
+		            	 result = Number(value);
+		            	 return result.toLocaleString();
+		            }
+				}, {
+					header : '등록일',
+					name : 'productDate',
+			        align: "center",
+			        width: 140,
+			        sortingType: 'desc',
+			        sortable: true,
+				}]
+			}); 
+			
+			grid.on('response', ev => {
+				  const {response} = ev.xhr;
+				  const responseObj = JSON.parse(response);
+				  if(responseObj.result === true){
+						if(responseObj.data === true){
+							var header = $("meta[name='_csrf_header']").attr("content");
+							$.ajax({
+								url : "/productManagement/productList",
+								type : "GET",
+								contentType: 'application/json',
+								success : function(result) {
+									grid.resetData(result.data.contents);
+								},
+						        error: function(jqXHR, exception){
+						            if (jqXHR.status == 400) {
+						                alert(jqXHR.responseText);
+						            } else
+						            	alert("error")
+						        }
+							});
+						}
+				  } else if(responseObj.result === false){
+					  setTimeout(function(){ 
+						  alert("입력 데이터의 형태가 부적절하여 작업을 완료하지 못하였습니다.\n(" + responseObj.message + ")"); 
+						  }, 100);
+				  	}
+			});
+			
+			removeBtn.addEventListener('click', () => {
+		        grid.removeCheckedRows (true);
+		      });
+			modifyBtn.addEventListener('click', () => {
+				  const { rowKey, columnName } = grid.getFocusedCell();
+
+				  if (rowKey && columnName) {
+				    grid.finishEditing(rowKey, columnName);
+				  }
+		    	grid.request('modifyData');
+		      });
+		    appendBtn.addEventListener('click', () => {
+		        grid.prependRow(appendedData); //첫번째 행 앞에 행 추가
+		        //grid.appendRow(appendedData); //마지막 행 뒤에 행 추가
+		      });
+		    
+			const Grid = tui.Grid;
+			Grid.setLanguage('en');
+			Grid.setLanguage('ko');
+			Grid.setLanguage('en-US', {
+			     display: {
+			         noData: 'No data.',
+			         loadingData: 'Loading data.',
+			     },
+			     net: {
+			         confirmDelete: '확인 버튼을 누르면 {{count}}개의 행을 제거합니다.',
+				     confirmModify: '확인 버튼을 누르면 {{count}}개의 수정된 행을 동기화 시킵니다.',
+				     noDataToModify: '변동된 데이터가 없습니다.',
+				     failResponse: '데이터 요청 중에 에러가 발생하였습니다.\n다시 시도하여 주시기 바랍니다.'
+			     }
+			});
+			
+		    const appendedData = {
+		    		//productCode: 'null',
+		    		//productName: 'null',
+		    		//productType: 'null',
+		    		//productColor: 'null',
+		    		//productSize: 'null',
+		    		//productPurchasePrice: '0',
+		    		//productSellingPrice: '0'
+			    	//totalAmount: '[[${msg}]]' //자동입력 예제(model객체에 담겨진 데이터를 행 추가시 자동 입력, 행 수정 금지 설정 할것)
+		    	    };
+		     	
+		    findProductByProductCode.addEventListener('click', () => {
+				var header = $("meta[name='_csrf_header']").attr("content");
+				var productCode = $("#productCode").val();
+				var regExp = /\s/g;
+				if(regExp.test(productCode)){
+	                alert('제품코드에 공백을 제거해 주세요.');
+	                return
+				}
+				if(productCode == ''){
+	                alert('제품코드를 입력 해 주세요.');
+	                return
+				}
+				var jsonData = {
+					"productCode" : productCode
+				}
+				$.ajax({
+					url : "/productManagement/searchProductCode",
+					type : "POST",
+					data: JSON.stringify(jsonData),
+					contentType: 'application/json',
+					success : function(result) {
+						grid.resetData(result);
+					},
+			        error: function(jqXHR, exception){
+			            if (jqXHR.status == 400) {
+			                alert(jqXHR.responseText);
+			            } else
+			            	alert("error")
+			        }
+				});
+		      });
+			
+		    findProductByProductName.addEventListener('click', () => {
+				var header = $("meta[name='_csrf_header']").attr("content");
+				var productName = $("#productName").val();
+				var regExp = /\s/g;
+				if(regExp.test(productName)){
+	                alert('제품명에 공백을 제거해 주세요.');
+	                return
+				}
+				if(productName == ''){
+	                alert('제품명을 입력 해 주세요.');
+	                return
+				}
+				var jsonData = {
+					"productName" : productName
+				}
+				$.ajax({
+					url : "/productManagement/searchProductName",
+					type : "POST",
+					data: JSON.stringify(jsonData),
+					contentType: 'application/json',
+					success : function(result) {
+						grid.resetData(result);
+					},
+			        error: function(jqXHR, exception){
+			            if (jqXHR.status == 400) {
+			                alert(jqXHR.responseText);
+			            } else
+			            	alert("error")
+			        }
+				});
+		      });
+			
+		    findProductByDate.addEventListener('click', () => {
+				var header = $("meta[name='_csrf_header']").attr("content");
+				var startDate = $("#startDate").val();
+				var endDate = $("#endDate").val();
+				
+				var resultStartDate = startDate.replace(/\-/g,'');
+				var resultEndDate = endDate.replace(/\-/g,'');
+	   			var newStartDate = new Date(resultStartDate.substring(0,4), resultStartDate.substring(4,6), resultStartDate.substring(6,8))
+	   			var newEndDate   = new Date(resultEndDate.substring(0,4), resultEndDate.substring(4,6), resultEndDate.substring(6,8))
+	   			var interval =  ( newStartDate - newEndDate) / (1000 * 60 * 60 * 24)	  
+	   			if (startDate === '' || endDate === ''){
+	   				alert('조회기간을 입력해주세요.')
+	   				return
+	   			} else if (interval > 90 || interval < 0) {
+	   				alert('조회기간을 ' + 90 + '일 이내로 입력해주세요.')
+	   				return
+	   			}
+	   			
+				var jsonData = {'startDate' : startDate, 'endDate' : endDate};
+	 			$.ajax({
+					url : "/productManagement/searchProductDate",
+					type : "POST",
+					data: JSON.stringify(jsonData),
+					contentType: 'application/json',
+					dataType: 'json', 
+					success : function(result) {
+						grid.resetData(result);
+					},
+			        error: function(jqXHR, exception){
+			            if (jqXHR.status == 400) {
+			                alert(jqXHR.responseText);
+			            } else
+			            	alert("error")
+			        }
+				});
+		      });
+			
+			$(function() {
+		          $("#productCode").autocomplete({
+		              source : function( request, response ) {
+						   var jsonData = {
+							   "input" : request.term
+						   }
+		                   $.ajax({
+		                          url: "/productManagement/autoCompleteProductCode",
+		                          type: 'POST',
+		                          dataType: "json",
+		      					  contentType: 'application/json',
+		      					  data: JSON.stringify(jsonData),
+		                          success: function(data) {
+		                              response(
+		                                  $.map(data, function(item) {
+		                                      return {
+		                                          label: item,
+		                                          value: item
+		                                      }
+		                                  })
+		                              );
+		                          }
+		                   });
+		              },
+		              focus : function(event, ui) {
+		                  return false;
+		              },
+		              minLength: 1,
+		              autoFocus: true,
+		              delay: 100
+		          });
+		          $("#productName").autocomplete({
+		              source : function( request, response ) {
+						   var jsonData = {
+							   "input" : request.term
+						   }
+		                   $.ajax({
+		                          url: "/productManagement/autoCompleteProductName",
+		                          type: 'POST',
+		                          dataType: "json",
+		      					  contentType: 'application/json',
+		      					  data: JSON.stringify(jsonData),
+		                          success: function(data) {
+		                              response(
+		                                  $.map(data, function(item) {
+		                                      return {
+		                                          label: item,
+		                                          value: item
+		                                      }
+		                                  })
+		                              );
+		                          }
+		                   });
+		              },
+		              focus : function(event, ui) {
+		                  return false;
+		              },
+		              minLength: 1,
+		              autoFocus: true,
+		              delay: 100
+		         });  
+				
+	            //모든 datepicker에 대한 공통 옵션 설정
+	            $.datepicker.setDefaults({
+	                dateFormat: 'yy-mm-dd' //Input Display Format 변경
+	                ,showOtherMonths: true //빈 공간에 현재월의 앞뒤월의 날짜를 표시
+	                ,showMonthAfterYear:true //년도 먼저 나오고, 뒤에 월 표시
+	                ,changeYear: true //콤보박스에서 년 선택 가능
+	                ,changeMonth: true //콤보박스에서 월 선택 가능                
+	                ,showOn: "both" //button:버튼을 표시하고,버튼을 눌러야만 달력 표시 ^ both:버튼을 표시하고,버튼을 누르거나 input을 클릭하면 달력 표시  
+	                ,buttonImage: "http://jqueryui.com/resources/demos/datepicker/images/calendar.gif" //버튼 이미지 경로
+	                ,buttonImageOnly: true //기본 버튼의 회색 부분을 없애고, 이미지만 보이게 함
+	                ,buttonText: "선택" //버튼에 마우스 갖다 댔을 때 표시되는 텍스트                
+	                ,yearSuffix: "년" //달력의 년도 부분 뒤에 붙는 텍스트
+	                ,monthNamesShort: ['1','2','3','4','5','6','7','8','9','10','11','12'] //달력의 월 부분 텍스트
+	                ,monthNames: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'] //달력의 월 부분 Tooltip 텍스트
+	                ,dayNamesMin: ['일','월','화','수','목','금','토'] //달력의 요일 부분 텍스트
+	                ,dayNames: ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'] //달력의 요일 부분 Tooltip 텍스트
+	                //,minDate: "-90D" //최소 선택일자(-1D:하루전, -1M:한달전, -1Y:일년전)
+	                ,maxDate: "today" //최대 선택일자(+1D:하루후, -1M:한달후, -1Y:일년후)                    
+	            });
+	            //input을 datepicker로 선언
+	            $("#startDate").datepicker();                    
+	            $("#endDate").datepicker();
+	            //startDate의 초기값을 오늘 날짜로 설정
+	            $('#startDate').datepicker('setDate', 'today'); //(-1D:하루전, -1M:한달전, -1Y:일년전), (+1D:하루후, -1M:한달후, -1Y:일년후)
+	            //endDate의 초기값을 내일로 설정
+	            $('#endDate').datepicker('setDate', '-1D'); //(-1D:하루전, -1M:한달전, -1Y:일년전), (+1D:하루후, -1M:한달후, -1Y:일년후)
+	        });
+		}
+	</script>
+</th:block>
+</html>

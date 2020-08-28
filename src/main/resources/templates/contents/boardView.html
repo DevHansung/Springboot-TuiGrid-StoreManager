@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	layout:decorator="layout/layout">
+
+<th:block layout:fragment="content">
+<div class="container">
+  <h2>게시판</h2>
+  <p>게시판 입니다.</p>
+  <div>            
+	  <table id="boardTable" class="table table-sm table-striped">
+	    <thead>
+	      <tr>
+	        <th>NUM</th>
+	        <th>제목</th>
+	        <th>본문</th>
+	        <th>작성자</th>
+	        <th>지점</th>
+	        <th>조회수</th>
+	        <th>작성일</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr th:each="boardList : ${boardList}">
+		     <td th:text="${boardList.boardNum}">NUM</td>
+		     <td><a th:href="@{/boardDetail?(currentPage=${pageNum}, boardNum=${boardList.boardNum})}" th:text="${boardList.boardTitle}"></a></td>
+		     <td th:text="...">본문</td>
+		     <td th:text="${boardList.boardWriter}">작성자</td>
+		     <td th:text="${boardList.boardBranch}">지점</td>
+		     <td th:text="${boardList.boardCount}">조회수</td>
+		     <td th:text="${boardList.boardDate}">작성일</td>
+		  </tr>
+	    </tbody>
+	  </table>
+  </div>
+  <div>
+  <a th:href="@{/writeBoard?(currentPage=${pageNum})}"><button class="btn btn-xs btn-secondary">게시글 작성</button></a>
+  </div>
+  <div style="text-align: center;">
+      <ul class="pagination">
+        <li class="page-item" th:if="${startPageNum > 1}">
+            <a th:href="@{/boardView?(currentPage=1)}" th:text="'<<'"></a>
+        </li>
+        <li class="page-item" th:if="${startPageNum > 1}">
+            <a class="page-link" th:href="@{/boardView?(currentPage=${startPageNum - 1})}" th:text="'<'"></a>
+        </li>
+        <li th:each="currentPage: ${#numbers.sequence(startPageNum, endPageNum)}" class="page-item">
+            <a class="page-link" th:href="@{/boardView?(currentPage=${currentPage})}" th:text="${currentPage}"></a>
+        </li>
+        <li class="page-item" th:if="${endPageNum < pageNum}">
+            <a class="page-link" th:href="@{/boardView?(currentPage=${endPageNum + 1})}" th:text="'>'"></a>
+        </li>
+        <li class="page-item" th:if="${endPageNum < pageNum}">
+            <a class="page-link" th:href="@{/boardView?(currentPage=${pageNum - 1})}" th:text="'>>'"></a>
+        </li>
+     </ul> 
+ </div>
+</div>
+</th:block>
+</html>

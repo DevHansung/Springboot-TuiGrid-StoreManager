@@ -1,0 +1,33 @@
+@charset "UTF-8";
+
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+}
+
+.custom-button {
+	background-color: transparent;
+	border: 0;
+}
+
+.custom-nutton:visited{
+	background-color: transparent;
+	border: 0;
+}
+
+.custom-search-box{
+	font-size: 12px;
+	border: 1px solid #A4A4A4;
+	padding: 10px;
+	margin-bottom: 10px;
+	margin-top: 10px;
+}
+
+.input-xs {
+  height: 23px!important;
+  padding: 2px 5px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 3px;
+}

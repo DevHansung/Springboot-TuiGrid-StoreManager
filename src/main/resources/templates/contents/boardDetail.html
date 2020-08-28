@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	layout:decorator="layout/layout">
+
+<th:block layout:fragment="content">
+	<div class="container">
+		<h2>게시글 상세보기</h2>
+		<div class="row">
+			<div class="col-sm-12">
+				<div>
+					<table>
+						<tr>
+							<th><strong> 제목: </strong></th>
+							<td th:text="${board.BoardTitle}"></td>
+						</tr>
+						<tr>
+							<th><strong> 작성자: </strong></th>
+							<td th:text="${board.boardWriter}"></td>
+						</tr>
+						<tr>
+							<th><strong> 작성일: </strong></th>
+							<td th:text="${board.boardDate}"></td>
+						</tr>
+						<tr>
+							<th><strong>내용: </strong></th>
+							<td th:text="${board.boardText}"></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div>
+				<a th:href=@{/boardView?(currentPage=${currentPage})}>
+					<button class="btn btn-xs btn-info">게시글 목록</button>
+				</a>
+				<a th:href="@{/updateBoard?(boardNum=${board.boardNum}, currentPage=${currentPage})}">
+					<button class="btn btn-xs btn-warning">수정</button>
+				</a>
+				<button id="deleteBoard" class="btn btn-xs btn-danger">삭제</button>
+			</div>
+			<br>
+		</div>
+
+		<div>
+			<br>
+			<div>
+				<div>
+					<span><strong>Reply</strong></span> <span id="ReplyCount"></span>
+				</div>
+				<div sec:authorize="isAuthenticated()">
+					<table class="table col-md-12">
+						<tr>
+							<td><textarea class="table col-sm-12" rows="3" cols="30"
+									id="replyText" name="replyText" placeholder="댓글을 입력하세요."></textarea>
+								<div>
+									<button id="writeRreply" class="btn btn-sm btn-secondary">등록</button>
+								</div></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div id="replyPage" name="replyPage" class="container">
+				<form id="replyList" name="replyList" method="post">
+					<div id="replyList"></div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		$(document).on("click", "#deleteBoard", function() {
+			const boardWriter = '[[${board.boardWriter}]]'
+			const boardNum = '[[${board.boardNum}]]'
+			var jsonData = {
+				"boardWriter" : boardWriter,
+				"boardNum" : boardNum,
+			};
+			$.ajax({
+				url : "/boardDetail/deleteBoard",
+				type : 'DELETE',
+				contentType : 'application/json',
+				data : JSON.stringify(jsonData),
+				success : function(data) {
+					if (data == "success") {
+						alert("게시글이 삭제되었습니다.");
+						location.href = "/boardView?currentPage="
+								+ '[[${currentPage}]]';
+					} else if (data == "error") {
+						alert("본인이 작성한 게시글만 삭제 가능합니다.");
+							}
+				},
+				error : function(error) {
+					console.log(error)
+				}
+			});
+		});
+		
+		$(function() {
+			getReplyList();
+		});
+
+		function getReplyList() {
+			$.ajax({
+				type : 'GET',
+				url : "/boardDetail/replyList?boardNum="
+						+ '[[${board.boardNum}]]',
+				dataType : "json",
+				data : $("#replyForm").serialize(),
+				//contentType : "application/x-www-form-urlencoded; charset=UTF-8",
+				success : function(data) {
+					var html = "";
+					var ReplyCount = data.length;
+					if (data.length > 0) {
+						for (i = 0; i < data.length; i++) {
+							html += "<div>";
+							html += "<div><table class='table'>";
+							html += "<h6><strong>작성자: "
+									+ data[i].replyWriter
+									+ "</strong></h6>";
+							html += "작성일: " + data[i].replyDate
+										+ "<br>";
+							html += "내용: " + data[i].replyText
+									+ "<br><tr><td></td></tr>";
+							html += '<div th:if="${session.name} == ${reply.replyWriter}">';
+							html += '<a href="javascript:void(0)" onclick="deleteReply('
+									+ data[i].replyNum + ')" >삭제</a>';
+							html += '</div>';
+							html += "</table></div>";
+							html += "</div>";
+						}
+					} else {
+							html += "<div>";
+							html += "<div><table class='table'><h6><strong>등록된 댓글이 없습니다.</strong></h6>";
+							html += "</table></div>";
+							html += "</div>";
+					}
+					$("#ReplyCount").html(ReplyCount);
+					$("#replyList").html(html);
+				},
+				error : function(request, status, error) {
+				}
+			});
+		}
+		
+		$(document).on("click", "#writeRreply", function() {
+			const replyText = $("#replyText").val();
+			const replyWriter = '[[${session.name}]]'
+			const boardNum = '[[${board.boardNum}]]'
+			var jsonData = {
+				"boardNum" : boardNum,
+				"replyWriter" : replyWriter,
+				"replyText" : replyText,
+			};
+			$.ajax({
+				url : "/boardDetail/writeReply",
+				type : 'POST',
+				contentType : 'application/json',
+				data : JSON.stringify(jsonData),
+				success : function(data) {
+					console.log(data)
+					alert("댓글 작성을 완료했습니다.");
+					if (data == "success") {
+						getReplyList();
+						$("#reply").val("");
+					}
+				},
+				error : function(error) {
+					console.log(error)
+				}
+			});
+		});
+
+		function deleteReply(replyNum) {
+			console.log(replyNum)
+			var jsonData = {
+				"replyNum" : replyNum,
+			};
+			$.ajax({
+				url : "/boardDetail/deleteReply",
+				type : "DELETE",
+				contentType : "application/json",
+				data : JSON.stringify(jsonData),
+				success : function(result) {
+					if (result == "success") {
+						alert("댓글 삭제를 완료했습니다.");
+						getReplyList();
+					} else if (result == "error") {
+						alert("작성자 본인만 삭제할 수 있습니다.");
+					}
+				},
+				error : function(error) {
+					console.log("error: " + error);
+				}
+			});
+		}
+	</script>
+</th:block>
+</html>

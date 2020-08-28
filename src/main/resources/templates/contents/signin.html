@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible">
+  <title>AdminLTE 3 | Log in</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" th:href="@{https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css}">
+  <link rel="stylesheet" th:href="@{https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700}">   
+  <link rel="stylesheet" th:href="@{/adminlte/plugins/fontawesome-free/css/all.min.css}">
+  <link rel="stylesheet" th:href="@{/adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/adminlte/dist/css/adminlte.min.css}">
+  
+  <script src="/adminlte/plugins/jquery/jquery.min.js"></script>
+  <script src="/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="/adminlte/dist/js/adminlte.min.js"></script>
+</head>
+<body class="hold-transition login-page">
+<div class="login-box">
+  <div class="login-logo">
+    <a th:href="@{/}"><b>Store</b>Manager</a>
+  </div>
+  <div class="card">
+    <div class="card-body login-card-body">
+      <p class="login-box-msg">Sign in to start your session</p>
+		<form th:action="@{/user/signinProcess}" method="POST">
+		   <div class="input-group mb-3">
+		     <input type="text" class="form-control" name="username" 
+		      placeholder="username입력" required>
+		     <div class="input-group-append">
+		       <div class="input-group-text">
+		         <span class="fas fa-envelope"></span>
+		       </div>
+		     </div>
+		   </div>
+		   <div class="input-group mb-3">
+			 <input type="password"class="form-control" name="password" 
+			  placeholder="password입력" required>	          
+			 <div class="input-group-append">
+		       <div class="input-group-text">
+		         <span class="fas fa-lock"></span>
+		       </div>
+		     </div>
+		   </div>
+		   <div><span style="color: #990000;" th:text="${login_error}"></span></div>
+		   <div class="row">
+		     <div class="col-12">
+	        	<button type="submit" class="btn btn-primary btn-block">Sign In</button>
+       		 </div>
+		   </div>
+		</form>
+      <div class="social-auth-links text-center mb-3">
+        <a th:href="@{/user/signup}" class="btn btn-block btn-danger">
+          SignUp
+        </a>
+      </div>
+      <p class="mb-1" style="font-size: 10px;">
+        <a href="#">비밀번호 찾기</a>
+      </p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

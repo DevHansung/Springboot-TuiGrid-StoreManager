@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	layout:decorator="layout/layout">
+
+<th:block layout:fragment="content">
+<div class="container">
+  <h2>회원관리</h2>
+  <p>회원관리 페이지 입니다.</p>
+  <div>            
+	  <table id="userTable" class="table table-sm table-striped">
+	    <thead>
+	      <tr>
+	        <th>SEQ</th>
+	        <th>Username</th>
+	        <th>Name</th>
+	        <th>Email</th>
+	        <th>지점</th>
+	        <th>활성상태</th>
+	        <th>권한</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr th:each="userList : ${userList}">
+		     <td th:text="${userList.userId}">SEQ</td>
+		     <td th:text="${userList.username}">USERNAME</td>
+		     <td th:text="${userList.name}">NAME</td>
+		     <td th:text="${userList.email}">EMAIL</td>
+		     <td th:text="${userList.branch}">BRANCH</td>
+		     <td>
+		     	<select class="form-control-sm" id="enabledEdit">
+				    <option
+				        th:text="비활성" 
+       					th:value="0" 
+       					th:selected="${userList.enabled}" 
+      					id="0">
+      				</option>
+      				<option
+				        th:text="활성" 
+       					th:value="1" 
+       					th:selected="${userList.enabled}" 
+      					id="1">
+      				</option>
+			  	</select>
+		     </td>
+		     <td>
+		     	<select class="form-control-sm" id="roleEdit"> <!-- onchange="getval(this);" -->
+				    <option
+				        th:text="ADMIN" 
+       					th:value="ROLE_ADMIN" 
+       					th:selected="${'ROLE_ADMIN' == userList.roleName}" 
+      					id="ROLE_ADMIN">
+      				</option>
+      				<option
+				        th:text="MANAGER" 
+       					th:value="ROLE_MANAGER" 
+       					th:selected="${'ROLE_MANAGER' == userList.roleName}" 
+      					id="ROLE_MANAGER">
+      				</option>
+      				<option
+				        th:text="DIRECTOR" 
+       					th:value="ROLE_DIRECTOR" 
+       					th:selected="${'ROLE_DIRECTOR' == userList.roleName}"
+      					id="ROLE_DIRECTOR">
+      				</option>
+			  	</select>
+		     </td>
+		  </tr>
+	    </tbody>
+	  </table>
+  </div>
+  <div  style="text-align: center;">
+      <ul class="pagination">
+        <li class="page-item" th:if="${startPageNum > 1}">
+            <a th:href="@{/userManagement?(currentPage=1)}" th:text="'<<'"></a>
+        </li>
+        <li class="page-item" th:if="${startPageNum > 1}">
+            <a class="page-link" th:href="@{/userManagement?(currentPage=${startPageNum - 1})}" th:text="'<'"></a>
+        </li>
+        <li th:each="currentPage: ${#numbers.sequence(startPageNum, endPageNum)}" class="page-item">
+            <a class="page-link" th:href="@{/userManagement?(currentPage=${currentPage})}" th:text="${currentPage}"></a>
+        </li>
+        <li class="page-item" th:if="${endPageNum < pageNum}">
+            <a class="page-link" th:href="@{/userManagement?(currentPage=${endPageNum + 1})}" th:text="'>'"></a>
+        </li>
+        <li class="page-item" th:if="${endPageNum < pageNum}">
+            <a class="page-link" th:href="@{/list?(currentPage=${pageNum - 1})}" th:text="'>>'"></a>
+        </li>
+     </ul>
+ </div>
+</div>
+<script>
+window.onload = function() {
+	let userId = null
+	$("#userTable tbody").on("change", "tr", function(){
+	    userId = $(this).find("td:eq(0)").text();
+	});
+	$("#userTable").on('change','#enabledEdit', (event) => {
+		const changeEnabled=(event.target.value);
+		const jsonData = {
+				"userId" : userId,
+				"changeEnabled" : changeEnabled
+			}
+            $.ajax({
+                   url: "/userManagement/changeEnabled",
+                   type: 'POST',
+                   dataType: "json",
+  				   contentType: 'application/json',
+  				   data: JSON.stringify(jsonData),
+                   success: function(result) {
+
+                   }
+            });	
+	});
+	$("#userTable").on('change','#roleEdit', (event) => {
+		const changeRole=(event.target.value);		
+		const jsonData = {
+				"userId" : userId,
+				"changeRole" : changeRole
+			}
+            $.ajax({
+                   url: "/userManagement/changeRole",
+                   type: 'POST',
+                   dataType: "json",
+  				   contentType: 'application/json',
+  				   data: JSON.stringify(jsonData),
+                   success: function(result) {
+
+                   }
+            });		
+	});
+}
+</script>
+</th:block>
+</html>

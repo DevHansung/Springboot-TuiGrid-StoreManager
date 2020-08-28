@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<title>CSRF Submit Result Page</title>
+		<link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+		<script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+		<script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+	</head>
+	<body>
+		<div class="container">
+			<div style="margin-top: 40px">
+				<div class="jumbotron" style="text-align: center;">
+					<h3 style="color: #990000;">ERROR</h3>
+					<h3>문제가 발생 하였습니다</h3>
+					message: <span th:utext="${error}"></span>(error)<br/>
+					action: <a th:href="@{/}">Go to home</a>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

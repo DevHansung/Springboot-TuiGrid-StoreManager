@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	layout:decorator="layout/layout">
+
+<th:block layout:fragment="content">
+	<div class="container">
+		<h3>전 지점 발주조회</h3>
+
+		<div class="custom-search-box">
+			<table class="table-xs table-bordered" style="width: 100%">
+		      <tr>
+		        <td class="table-secondary">
+		        	<span style="font-weight: bold;">품번 검색</span>
+		        </td>
+		        <td>
+			        <div class="input-group" style="width: 347px;">
+						<input style="height: 30px" autocomplete="off" type="text" class="form-control input-xs" id="productCode" placeholder="제품코드를 입력하세요.">
+			  			<span  class="input-group-btn">
+							<button class="btn btn-secondary btn-xs" id="searchProductByProductCode" type="button">검색</button> 
+			  			</span>
+					</div>
+		        </td>
+		      </tr>
+			  <tr>
+		        <td class="table-secondary">
+		        	<span style="font-weight: bold;">품명 검색</span>
+		        </td>
+		        <td>
+			        <div class="input-group" style="width: 347px;">
+						<input style="height: 30px" autocomplete="off" type="text" class="form-control input-xs" id="productName" placeholder="제품명을 입력하세요.">
+			  			<span  class="input-group-btn">
+							<button class="btn btn-secondary btn-xs" id="searchProductByProductName" type="button">검색</button> 
+			  			</span>
+					</div>
+		        </td>
+		      </tr>
+		      <tr>
+		        <td class="table-secondary">
+		        	<span style="font-weight: bold;">지점 검색</span>
+		        </td>
+		        <td>
+			        <div class="input-group" style="width: 347px;">
+						<input style="height: 30px" autocomplete="off" type="text" class="form-control input-xs" id="orderBranch" placeholder="제품명을 입력하세요.">
+			  			<span  class="input-group-btn">
+							<button class="btn btn-secondary btn-xs" id="searchProductByOrderBranch" type="button">검색</button> 
+			  			</span>
+					</div>
+		        </td>
+		      </tr>			      
+		      <tr>
+		        <td class="table-secondary">
+		        	<span style="font-weight: bold;">날자 검색</span>
+		        </td>
+		        <td>
+					<div id="datePic">
+						<input autocomplete="off" type="text" id="startDate" name="startDate" readonly>
+						~
+						<input autocomplete="off" type="text" id="endDate" name="endDate" readonly>
+						<button class="btn btn-xs btn-secondary" id="searchProductByDate" type="button">검색</button>
+						<span style="font-size: 10px;">※시작일로부터 최대 3개월(90일) 이전 까지만 조회 가능합니다.</span>
+					</div>
+		        </td>
+		      </tr>
+	  		</table>
+		</div>
+		<div style="margin-bottom: 3px;">
+			<button class="btn btn-success btn-xs" id="modifyBtn">동기화</button>
+		</div>
+		<div id="grid"></div>
+		<p style="font-size: 11px;">※조회만 가능합니다.<br/></p>
+	</div>
+	<script>
+		window.onload = function() {
+			const grid = new tui.Grid({
+				el : document.getElementById('grid'),
+				data: {
+					api: {
+						readData: {url: 'orderView/orderList',method: 'GET'},
+					},
+					contentType: 'application/json'
+				},
+				scrollX : true,
+				scrollY : true,
+			    minBodyHeight: 30,
+			    pageOptions: {
+			      useClient: true,
+			      perPage: 10
+			    },
+				columns : [ {
+					header : 'SEQ',
+					name : 'orderSeq',
+			        align: "center",
+			        width: 30,
+			        sortingType: 'desc',
+			        sortable: true
+				},{
+					header : '주문일',
+					name : 'orderDate',
+			        align: "center",
+			        width: 80,
+			        sortingType: 'desc',
+			        sortable: true
+				}, {
+					header : '제품번호',
+					name : 'productCode',
+			        align: "center",
+			        width: 130,
+			        filter: {
+			         	type: 'text',
+			         	operator: 'OR'
+			       	}
+				}, {
+					header : '제품명',
+					name : 'productName',
+			        align: "center",
+			        width: 160,
+			        filter: {
+			         	type: 'text',
+			       	}
+				}, {
+					header : '분류',
+					name : 'productType',
+			        align: "center",
+			        width: 90,
+			        filter: {
+			         	type: 'text',
+			       	}
+				}, {
+					header : 'COLOR',
+					name : 'productColor',
+			        align: "center",
+			        width: 100,
+			        filter: {
+			         	type: 'text',
+			         	operator: 'OR'
+			       	}
+				}, {
+					header : 'SIZE',
+					name : 'productSize',
+			        align: "center",
+			        width: 60,
+			        filter: {
+			         	type: 'text',
+			         	operator: 'OR'
+			       	}
+				}, {
+					header : '판매단가',
+					name : 'productSellingPrice',
+			        align: "center",
+			        width: 80,
+			        sortingType: 'desc',
+			        sortable: true,
+		            formatter: ({value}) => {
+		            	 result = Number(value);
+		            	 return result.toLocaleString();
+		            }
+				}, {
+					header : '매입단가',
+					name : 'productPurchasePrice',
+			        align: "center",
+			        width: 80,
+			        sortingType: 'desc',
+			        sortable: true,
+		            formatter: ({value}) => {
+		            	 result = Number(value);
+		            	 return result.toLocaleString();
+		            }
+				}, {
+					header : '주문수량',
+					name : 'orderQuantity',
+			        align: "center",
+			        width: 80,
+			        sortingType: 'desc',
+			        sortable: true,
+				    onAfterChange: (value) => {
+				    	const row = grid.getRow(value.rowKey)
+				    	grid.setValue(value.rowKey, 'orderPrice', row.productPurchasePrice * row.orderQuantity)
+				    }
+				}, {
+					header : '주문가격',
+					name : 'orderPrice',
+			        align: "center",
+			        width: 125,
+			        sortingType: 'desc',
+			        sortable: true,
+		            formatter: ({value}) => {
+		            	return value.toLocaleString();
+		            }
+				}, {
+					header : '주문상태',
+					name : 'orderState',
+			        align: "center",
+			        width: 80,
+			        sortingType: 'desc',
+			        sortable: true
+				}, {
+					header : '주문지점',
+					name : 'orderBranch',
+			        align: "center",
+			        width: 80,
+			        sortingType: 'desc',
+			        sortable: true
+				}],
+				summary: {
+			        height: 40,
+			        position: 'bottom',
+			        columnContent: {
+			        	productPurchasePrice: {
+				            template: () => {
+				              return `합계:`;
+				            },
+			        	},
+			        	orderQuantity: {
+				            template: (valueMap) => {
+				              return `${valueMap.sum} 개`;
+				            },
+			        	},
+			        	orderPrice: {
+				            template: (valueMap) => {
+				              return `${valueMap.sum.toLocaleString()} 원`;
+				            }
+			          	}
+			        }
+				}
+			});     
+			
+			grid.on('response', ev => {
+				  const {response} = ev.xhr;
+				  const responseObj = JSON.parse(response);
+				  if(responseObj.result === true){
+						if(responseObj.data === true){
+							var header = $("meta[name='_csrf_header']").attr("content");
+							$.ajax({
+								url : "/orderView/orderList",
+								type : "GET",
+								contentType: 'application/json',
+								success : function(result) {
+									grid.resetData(result.data.contents);
+								},
+						        error: function(jqXHR, exception){
+						            if (jqXHR.status == 400) {
+						                alert(jqXHR.responseText);
+						            } else
+						            	alert("error")
+						        }
+							});
+						}
+				  } else if(responseObj.result === false){
+					  setTimeout(function(){ 
+						  alert("입력 데이터의 형태가 부적절하여 작업을 완료하지 못하였습니다."); 
+						  }, 100);
+				  	}
+			});
+			
+			searchProductByProductCode.addEventListener('click', () => {
+				var header = $("meta[name='_csrf_header']").attr("content");
+				var productCode = $("#productCode").val();
+				var jsonData = {
+					"productCode" : productCode
+				}
+				$.ajax({
+					url : "/orderView/searchProductCode",
+					type : "POST",
+					data: JSON.stringify(jsonData),
+					contentType: 'application/json',
+					success : function(result) {
+						grid.resetData(result);
+					},
+			        error: function(jqXHR, exception){
+			            if (jqXHR.status == 400) {
+			                alert(jqXHR.responseText);
+			            } else
+			            	alert("error")
+			        }
+				});
+		      });
+			
+			searchProductByProductName.addEventListener('click', () => {
+				var header = $("meta[name='_csrf_header']").attr("content");
+				var productName = $("#productName").val();
+				var jsonData = {
+					"productName" : productName
+				}
+				$.ajax({
+					url : "/orderView/searchProductName",
+					type : "POST",
+					data: JSON.stringify(jsonData),
+					contentType: 'application/json',
+					success : function(result) {
+						grid.resetData(result);
+					},
+			        error: function(jqXHR, exception){
+			            if (jqXHR.status == 400) {
+			                alert(jqXHR.responseText);
+			            } else
+			            	alert("error")
+			        }
+				});
+		      });
+			
+			searchProductByOrderBranch.addEventListener('click', () => {
+				var header = $("meta[name='_csrf_header']").attr("content");
+				var orderBranch = $("#orderBranch").val();
+				var jsonData = {
+					"currentBranch" : currentBranch
+				}
+				$.ajax({
+					url : "/orderView/searchOrderBranch",
+					type : "POST",
+					data: JSON.stringify(jsonData),
+					contentType: 'application/json',
+					success : function(result) {
+						grid.resetData(result);
+					},
+			        error: function(jqXHR, exception){
+			            if (jqXHR.status == 400) {
+			                alert(jqXHR.responseText);
+			            } else
+			            	alert("error")
+			        }
+				});
+		      });
+			
+			searchProductByDate.addEventListener('click', () => {
+				var header = $("meta[name='_csrf_header']").attr("content");
+				var startDate = $("#startDate").val();
+				var endDate = $("#endDate").val();
+				
+				var resultStartDate = startDate.replace(/\-/g,'');
+				var resultEndDate = endDate.replace(/\-/g,'');
+	   			var newStartDate = new Date(resultStartDate.substring(0,4), resultStartDate.substring(4,6), resultStartDate.substring(6,8))
+	   			var newEndDate   = new Date(resultEndDate.substring(0,4), resultEndDate.substring(4,6), resultEndDate.substring(6,8))
+	   			var interval =  ( newStartDate - newEndDate) / (1000 * 60 * 60 * 24)	  
+	   			if (startDate === '' || endDate === ''){
+	   				alert('조회기간을 입력해주세요.')
+	   				return
+	   			} else if (interval > 90 || interval < 0) {
+	   				alert('조회기간을 ' + 90 + '일 이내로 입력해주세요.')
+	   				return
+	   			}
+	   			
+				var jsonData = {'startDate' : startDate, 'endDate' : endDate};
+	 			$.ajax({
+					url : "/orderView/searchOrderDate",
+					type : "POST",
+					data: JSON.stringify(jsonData),
+					contentType: 'application/json',
+					dataType: 'json', 
+					success : function(result) {
+						grid.resetData(result);
+					},
+			        error: function(jqXHR, exception){
+			            if (jqXHR.status == 400) {
+			                alert(jqXHR.responseText);
+			            } else
+			            	alert("error")
+			        }
+				});
+		      });
+			
+			$(function() {
+		          $("#productCode").autocomplete({
+		              source : function( request, response ) {
+						   var jsonData = {
+							   "input" : request.term
+						   }
+		                   $.ajax({
+		                          url: "/orderView/autoCompleteProductCode",
+		                          type: 'POST',
+		                          dataType: "json",
+		      					  contentType: 'application/json',
+		      					  data: JSON.stringify(jsonData),
+		                          success: function(data) {
+		                              response(
+		                                  $.map(data, function(item) {
+		                                      return {
+		                                          label: item,
+		                                          value: item
+		                                      }
+		                                  })
+		                              );
+		                          }
+		                   });
+		              },
+		              focus : function(event, ui) {
+		                  return false;
+		              },
+		              minLength: 1,
+		              autoFocus: true,
+		              delay: 100
+		          });
+		          $("#productName").autocomplete({
+		              source : function( request, response ) {
+						   var jsonData = {
+							   "input" : request.term
+						   }
+		                   $.ajax({
+		                          url: "/orderView/autoCompleteProductName",
+		                          type: 'POST',
+		                          dataType: "json",
+		      					  contentType: 'application/json',
+		      					  data: JSON.stringify(jsonData),
+		                          success: function(data) {
+		                              response(
+		                                  $.map(data, function(item) {
+		                                      return {
+		                                          label: item,
+		                                          value: item
+		                                      }
+		                                  })
+		                              );
+		                          }
+		                   });
+		              },
+		              focus : function(event, ui) {
+		                  return false;
+		              },
+		              minLength: 1,
+		              autoFocus: true,
+		              delay: 100
+		         });  
+				
+	            //모든 datepicker에 대한 공통 옵션 설정
+	            $.datepicker.setDefaults({
+	                dateFormat: 'yy-mm-dd' //Input Display Format 변경
+	                ,showOtherMonths: true //빈 공간에 현재월의 앞뒤월의 날짜를 표시
+	                ,showMonthAfterYear:true //년도 먼저 나오고, 뒤에 월 표시
+	                ,changeYear: true //콤보박스에서 년 선택 가능
+	                ,changeMonth: true //콤보박스에서 월 선택 가능                
+	                ,showOn: "both" //button:버튼을 표시하고,버튼을 눌러야만 달력 표시 ^ both:버튼을 표시하고,버튼을 누르거나 input을 클릭하면 달력 표시  
+	                ,buttonImage: "http://jqueryui.com/resources/demos/datepicker/images/calendar.gif" //버튼 이미지 경로
+	                ,buttonImageOnly: true //기본 버튼의 회색 부분을 없애고, 이미지만 보이게 함
+	                ,buttonText: "선택" //버튼에 마우스 갖다 댔을 때 표시되는 텍스트                
+	                ,yearSuffix: "년" //달력의 년도 부분 뒤에 붙는 텍스트
+	                ,monthNamesShort: ['1','2','3','4','5','6','7','8','9','10','11','12'] //달력의 월 부분 텍스트
+	                ,monthNames: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'] //달력의 월 부분 Tooltip 텍스트
+	                ,dayNamesMin: ['일','월','화','수','목','금','토'] //달력의 요일 부분 텍스트
+	                ,dayNames: ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'] //달력의 요일 부분 Tooltip 텍스트
+	                //,minDate: "-90D" //최소 선택일자(-1D:하루전, -1M:한달전, -1Y:일년전)
+	                ,maxDate: "today" //최대 선택일자(+1D:하루후, -1M:한달후, -1Y:일년후)                    
+	            });
+	            //input을 datepicker로 선언
+	            $("#startDate").datepicker();                    
+	            $("#endDate").datepicker();
+	            //startDate의 초기값을 오늘 날짜로 설정
+	            $('#startDate').datepicker('setDate', 'today'); //(-1D:하루전, -1M:한달전, -1Y:일년전), (+1D:하루후, -1M:한달후, -1Y:일년후)
+	            //endDate의 초기값을 내일로 설정
+	            $('#endDate').datepicker('setDate', '-1D'); //(-1D:하루전, -1M:한달전, -1Y:일년전), (+1D:하루후, -1M:한달후, -1Y:일년후)
+	        });
+		}
+	</script>
+</th:block>
+</html>

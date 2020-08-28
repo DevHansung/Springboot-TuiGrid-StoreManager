@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	layout:decorator="layout/layout">
+
+<th:block layout:fragment="content">
+	<div class="container">
+		<!-- Content Wrapper. Contains page content -->
+		<div class="content-wrapper">
+			<section class="content container-fluid">
+				<div class="card card-info">
+					<div class="card-header">
+						<h3 class="card-title">게시글 작성</h3>
+					</div>
+					<!-- form start -->
+					<form th:action="@{/updateBoard?(boardNum=${boardVo.boardNum}, currentPage=${currentPage})}" th:object="${boardVo}" method="POST">
+						<div class="card-body">
+							<div class="form-group">
+								<label for="BoardTitle">Title</label> 
+								<input type="text" name="boardTitle" th:field="*{boardTitle}" class="form-control" id="BoardTitle">
+							</div>
+							<div class="form-group">
+								<label>Text</label>
+								<textarea th:field="*{boardText}" class="form-control" rows="3"></textarea>
+							</div>
+						<input th:field="*{boardNum}" name="boardBranch" type="hidden">
+						
+						</div>
+						<div class="card-footer">
+							<button type="submit" class="btn btn-success">작성</button>
+							<a th:href="@{/boardDetail?(boardNum=${boardVo.boardNum}, currentPage=${currentPage})}" class="btn btn-warning">취소</a>
+						</div>
+					</form>
+				</div>
+			</section>
+		</div>
+	</div>
+</th:block>
+</html>

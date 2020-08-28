@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hansung.web.mapper.OrderMapper">
+	<!-- order start-->
+	<insert id="insertOrders" parameterType="java.util.List">
+		INSERT INTO
+		orders
+		(product_code, product_name, product_type,
+		product_color,
+		product_size, product_selling_price,
+		product_purchase_price,
+		order_quantity, order_price, order_state,
+		order_branch)
+		VALUES
+		<foreach collection="list" item="item" separator=",">
+			(#{item.productCode}, #{item.productName}, #{item.productType},
+			#{item.productColor}, #{item.productSize},
+			#{item.productSellingPrice}, #{item.productPurchasePrice},
+			#{item.orderQuantity}, #{item.orderPrice}, #{item.orderState},
+			#{item.orderBranch})
+		</foreach>
+	</insert>
+
+	<select id="searchProductByProductCode"
+		resultType="com.hansung.web.vo.ProductVo">
+		SELECT
+		p.product_seq AS productSeq,
+		p.product_code AS
+		productCode,
+		p.product_name AS productName,
+		p.product_type AS
+		productType,
+		p.product_color AS productColor,
+		p.product_size AS
+		productSize,
+		p.product_purchase_price AS productPurchasePrice,
+		p.product_selling_price AS productSellingPrice
+		FROM products AS p WHERE
+		p.product_code = #{productCode}
+	</select>
+
+	<select id="searchProductByProductName"
+		resultType="com.hansung.web.vo.ProductVo">
+		SELECT
+		p.product_seq AS productSeq,
+		p.product_code AS
+		productCode,
+		p.product_name AS productName,
+		p.product_type AS
+		productType,
+		p.product_color AS productColor,
+		p.product_size AS
+		productSize,
+		p.product_purchase_price AS productPurchasePrice,
+		p.product_selling_price AS productSellingPrice
+		FROM products AS p WHERE
+		p.product_name = #{productName}
+	</select>
+	
+	<select id="autoCompleteOrderByProductCode" resultType="String">
+		SELECT
+		product_code
+		FROM
+		products
+		WHERE
+		upper(product_code) LIKE upper("%"#{input}"%")
+	</select>
+	
+	<select id="autoCompleteOrderByProductName" resultType="String">
+		SELECT
+		product_name
+		FROM
+		products
+		WHERE
+		upper(product_name) LIKE upper("%"#{input}"%")
+	</select>	
+	<!-- order end-->
+	
+	<!-- orderView start-->	
+	<select id="findOrderView" resultType="com.hansung.web.vo.OrderVo">
+		SELECT
+		o.order_seq AS
+		orderSeq,
+		o.product_code AS productCode,
+		o.product_name AS productName,
+		o.product_type AS productType,
+		o.product_color AS productColor,
+		o.product_size AS productSize,
+		o.product_selling_price AS
+		productSellingPrice,
+		o.product_purchase_price AS productPurchasePrice,
+		o.order_quantity AS orderQuantity,
+		o.order_price AS orderPrice,
+		o.order_state AS orderState,
+		o.order_branch AS orderBranch,
+		o.order_date AS orderDate
+		FROM orders o WHERE DATE(order_date) >=
+		DATE_SUB(now(), INTERVAL 3 MONTH)
+	</select>
+	
+	<select id="searchOrderViewByProductCode"
+		resultType="com.hansung.web.vo.OrderVo">
+		SELECT
+		o.order_seq AS orderSeq,
+		o.product_code AS
+		productCode,
+		o.product_name AS productName,
+		o.product_type AS
+		productType,
+		o.product_color AS productColor,
+		o.product_size AS
+		productSize,
+		o.product_selling_price AS productSellingPrice,
+		o.product_purchase_price AS productPurchasePrice,
+		o.order_quantity AS
+		orderQuantity,
+		o.order_price AS orderPrice,
+		o.order_state AS orderState,
+		o.order_branch AS orderBranch,
+		o.order_date AS orderDate
+		FROM orders o
+		WHERE o.product_code = #{productCode}
+	</select>
+
+	<select id="searchOrderViewByProductName"
+		resultType="com.hansung.web.vo.OrderVo">
+		SELECT
+		o.order_seq AS orderSeq,
+		o.product_code AS
+		productCode,
+		o.product_name AS productName,
+		o.product_type AS
+		productType,
+		o.product_color AS productColor,
+		o.product_size AS
+		productSize,
+		o.product_selling_price AS productSellingPrice,
+		o.product_purchase_price AS productPurchasePrice,
+		o.order_quantity AS
+		orderQuantity,
+		o.order_price AS orderPrice,
+		o.order_state AS orderState,
+		o.order_branch AS orderBranch,
+		o.order_date AS orderDate
+		FROM orders o
+		WHERE o.product_name = #{productName}
+	</select>
+	
+	<select id="searchOrderViewByOrderBranch"
+		resultType="com.hansung.web.vo.OrderVo">
+		SELECT
+		o.order_seq AS orderSeq,
+		o.product_code AS
+		productCode,
+		o.product_name AS productName,
+		o.product_type AS
+		productType,
+		o.product_color AS productColor,
+		o.product_size AS
+		productSize,
+		o.product_selling_price AS productSellingPrice,
+		o.product_purchase_price AS productPurchasePrice,
+		o.order_quantity AS
+		orderQuantity,
+		o.order_price AS orderPrice,
+		o.order_state AS orderState,
+		o.order_branch AS orderBranch,
+		o.order_date AS orderDate
+		FROM orders o
+		WHERE o.order_branch = #{currentBranch}
+	</select>
+	
+	<select id="searchOrderViewByDate" parameterType="java.util.Map"
+		resultType="com.hansung.web.vo.OrderVo">
+		SELECT
+		o.order_seq AS orderSeq,
+		o.product_code AS
+		productCode,
+		o.product_name AS productName,
+		o.product_type AS
+		productType,
+		o.product_color AS productColor,
+		o.product_size AS
+		productSize,
+		o.product_selling_price AS productSellingPrice,
+		o.product_purchase_price AS productPurchasePrice,
+		o.order_quantity AS
+		orderQuantity,
+		o.order_price AS orderPrice,
+		o.order_state AS orderState,
+		o.order_branch AS orderBranch,
+		o.order_date AS orderDate
+		FROM orders o
+		WHERE DATE(o.order_date) BETWEEN #{endDate} AND #{startDate}
+	</select>
+
+	<select id="autoCompleteOrderViewByProductCode" resultType="String">
+		SELECT
+		product_code
+		FROM
+		orders
+		WHERE
+		upper(product_code) LIKE upper("%"#{input}"%")
+	</select>
+	
+	<select id="autoCompleteOrderViewByProductName" resultType="String">
+		SELECT
+		product_name
+		FROM
+		orders
+		WHERE
+		upper(product_name) LIKE upper("%"#{input}"%")
+	</select>
+	<!-- orderView end-->
+
+	<!-- orderManagement start-->
+	<select id="findOrderManagement" resultType="com.hansung.web.vo.OrderVo">
+		SELECT
+		o.order_seq AS
+		orderSeq,
+		o.product_code AS productCode,
+		o.product_name AS productName,
+		o.product_type AS productType,
+		o.product_color AS productColor,
+		o.product_size AS productSize,
+		o.product_selling_price AS
+		productSellingPrice,
+		o.product_purchase_price AS productPurchasePrice,
+		o.order_quantity AS orderQuantity,
+		o.order_price AS orderPrice,
+		o.order_state AS orderState,
+		o.order_branch AS orderBranch,
+		o.order_date AS orderDate
+		FROM orders o WHERE order_branch=#{currentBranch} and 
+        DATE(order_date) >= DATE_SUB(now(), INTERVAL 3 MONTH)
+	</select>
+	
+	<select id="getOrderStateByOrderSeq" resultType="String">
+		SELECT
+		order_state
+		FROM
+		orders
+		WHERE
+		order_seq = #{orderSeq}
+	</select>
+
+	<delete id="deleteOrders" parameterType="java.util.List">
+		DELETE FROM orders
+		WHERE
+		<foreach collection="list" item="item" separator="or"
+			index="index">
+			order_seq = #{item.orderSeq}
+		</foreach>
+	</delete>
+		
+	<update id="updateOrders" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index"
+			separator=";">
+			UPDATE orders
+			SET 
+			order_state = #{item.orderState}
+			WHERE order_seq = #{item.orderSeq}
+		</foreach>
+		;
+	</update>
+	
+	<select id="searchOrderManagementByProductCode" parameterType="java.util.Map"
+		resultType="com.hansung.web.vo.OrderVo">
+		SELECT
+		o.order_seq AS orderSeq,
+		o.product_code AS
+		productCode,
+		o.product_name AS productName,
+		o.product_type AS
+		productType,
+		o.product_color AS productColor,
+		o.product_size AS
+		productSize,
+		o.product_selling_price AS productSellingPrice,
+		o.product_purchase_price AS productPurchasePrice,
+		o.order_quantity AS
+		orderQuantity,
+		o.order_price AS orderPrice,
+		o.order_state AS orderState,
+		o.order_branch AS orderBranch,
+		o.order_date AS orderDate
+		FROM orders o
+		WHERE o.product_code = #{productCode}
+		and order_branch=#{currentBranch}
+	</select>
+	
+	<select id="searchOrderManagementByProductName"
+		resultType="com.hansung.web.vo.OrderVo">
+		SELECT
+		o.order_seq AS orderSeq,
+		o.product_code AS
+		productCode,
+		o.product_name AS productName,
+		o.product_type AS
+		productType,
+		o.product_color AS productColor,
+		o.product_size AS
+		productSize,
+		o.product_selling_price AS productSellingPrice,
+		o.product_purchase_price AS productPurchasePrice,
+		o.order_quantity AS
+		orderQuantity,
+		o.order_price AS orderPrice,
+		o.order_state AS orderState,
+		o.order_branch AS orderBranch,
+		o.order_date AS orderDate
+		FROM orders o
+		WHERE o.product_name = #{productName} AND order_branch=#{currentBranch}
+	</select>
+	
+	<select id="searchOrderManagementByDate" parameterType="java.util.Map"
+		resultType="com.hansung.web.vo.OrderVo">
+		SELECT
+		o.order_seq AS orderSeq,
+		o.product_code AS
+		productCode,
+		o.product_name AS productName,
+		o.product_type AS
+		productType,
+		o.product_color AS productColor,
+		o.product_size AS
+		productSize,
+		o.product_selling_price AS productSellingPrice,
+		o.product_purchase_price AS productPurchasePrice,
+		o.order_quantity AS
+		orderQuantity,
+		o.order_price AS orderPrice,
+		o.order_state AS orderState,
+		o.order_branch AS orderBranch,
+		o.order_date AS orderDate
+		FROM orders o
+		WHERE order_branch=#{currentBranch} AND
+		DATE(o.order_date) BETWEEN #{endDate} AND #{startDate}
+	</select>
+	
+	<select id="autoCompleteOrderManagementByProductCode" parameterType="java.util.Map" 
+		resultType="String">
+		SELECT
+		product_code
+		FROM
+		orders
+		WHERE
+		upper(product_code) LIKE upper("%"#{input}"%")
+		and order_branch=#{currentBranch}
+	</select>
+	
+	<select id="autoCompleteOrderManagementByProductName" parameterType="java.util.Map"
+		resultType="String">
+		SELECT
+		product_name
+		FROM
+		orders
+		WHERE
+		upper(product_name) LIKE upper("%"#{input}"%")
+		and order_branch=#{currentBranch}
+	</select>
+	<!-- orderManagement end-->
+</mapper>

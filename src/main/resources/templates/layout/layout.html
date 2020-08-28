@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <!-- global header(css, script) -->
+    <th:block th:replace="fragments/header :: headerFragment"></th:block>
+    <body class="hold-transition sidebar-mini">
+        <div class="wrapper">
+            <!-- global navbar -->
+            <th:block th:replace="fragments/navbar :: navbarFragment"></th:block> 
+            <th:block th:replace="fragments/sidebar :: sidebarFragment"></th:block> 
+            <div class="content-wrapper">
+                <th:block th:replace="fragments/contentHeader :: contentHeaderFragment"></th:block> 
+                <!-- 본문(요청에 따라 swap) -->
+                <th:block layout:fragment="content"></th:block>
+            </div>
+            <!-- global footer -->
+            <th:block th:replace="fragments/footer :: footerFragment"></th:block>
+        </div>
+        <!-- global script -->
+        <!-- <th:block th:replace="fragments/script :: scriptFragment"></th:block> -->
+    </body>
+</html>

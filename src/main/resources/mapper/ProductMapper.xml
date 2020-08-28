@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hansung.web.mapper.ProductMapper">
+	<select id="findProducts"
+		resultType="com.hansung.web.vo.ProductVo">
+		SELECT
+		p.product_seq AS productSeq,
+		p.product_code AS productCode,
+		p.product_name AS productName,
+		p.product_type AS productType,
+		p.product_color AS productColor,
+		p.product_size AS productSize,
+		p.product_purchase_price AS productPurchasePrice,
+		p.product_selling_price AS productSellingPrice,
+		p.product_date AS productDate
+		FROM products AS p
+		WHERE DATE(product_date) >= DATE_SUB(now(), INTERVAL 3 MONTH)
+		ORDER BY p.product_seq DESC
+	</select>
+	
+	<insert id="insertProducts" parameterType="java.util.List">
+		INSERT INTO
+		products
+		(product_code, product_name, product_type, product_color,
+		product_size, product_purchase_price, product_selling_price)
+		VALUES
+		<foreach collection="list" item="item" separator=",">
+			(#{item.productCode}, #{item.productName}, #{item.productType},
+			#{item.productColor},
+			#{item.productSize}, #{item.productPurchasePrice}, #{item.productSellingPrice})
+		</foreach>
+	</insert>
+
+	<delete id="deleteProducts" parameterType="java.util.List">
+		DELETE FROM products
+		WHERE
+		<foreach collection="list" item="item" separator="or"
+			index="index">
+			product_seq = #{item.productSeq}
+		</foreach>
+	</delete>
+	
+	<update id="updateProducts" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index"
+			separator=";">
+			UPDATE products
+			SET product_code = #{item.productCode},
+			product_name = #{item.productName},
+			product_type = #{item.productType},
+			product_color = #{item.productColor},
+			product_size = #{item.productSize},
+			product_purchase_price = #{item.productPurchasePrice},
+			product_selling_price = #{item.productSellingPrice}
+			WHERE product_seq = #{item.productSeq}
+		</foreach>
+		;
+	</update>
+	
+	<select id="searchProductsByDate"
+		resultType="com.hansung.web.vo.ProductVo">
+		SELECT
+		p.product_seq AS productSeq,
+		p.product_code AS productCode,
+		p.product_name AS productName,
+		p.product_type AS productType,
+		p.product_color AS productColor,
+		p.product_size AS productSize,
+		p.product_purchase_price AS productPurchasePrice,
+		p.product_selling_price AS productSellingPrice,
+		p.product_date AS productDate
+		FROM products AS p
+        WHERE DATE(p.product_date) BETWEEN #{endDate} AND #{startDate}
+        ORDER BY p.product_seq DESC
+	</select>
+	
+	<select id="searchProductsByProductCode"
+		resultType="com.hansung.web.vo.ProductVo">
+		SELECT
+		p.product_seq AS productSeq,
+		p.product_code AS productCode,
+		p.product_name AS productName,
+		p.product_type AS productType,
+		p.product_color AS productColor,
+		p.product_size AS productSize,
+		p.product_purchase_price AS productPurchasePrice,
+		p.product_selling_price AS productSellingPrice,
+		p.product_date AS productDate
+		FROM products AS p
+        WHERE product_code = #{ProductCode}
+        ORDER BY p.product_seq DESC
+	</select>
+	
+	<select id="searchProductsByProductName"
+		resultType="com.hansung.web.vo.ProductVo">
+		SELECT
+		p.product_seq AS productSeq,
+		p.product_code AS productCode,
+		p.product_name AS productName,
+		p.product_type AS productType,
+		p.product_color AS productColor,
+		p.product_size AS productSize,
+		p.product_purchase_price AS productPurchasePrice,
+		p.product_selling_price AS productSellingPrice,
+		p.product_date AS productDate
+		FROM products AS p
+        WHERE product_name = #{ProductName}
+        ORDER BY p.product_seq DESC
+	</select>
+	
+	<select id="autoCompleteProductByProductCode" resultType="String">
+		SELECT
+		product_code
+		FROM
+		products
+		WHERE
+		upper(product_code) LIKE upper("%"#{input}"%")
+	</select>
+	
+	<select id="autoCompleteProductByProductName" resultType="String">
+		SELECT
+		product_name
+		FROM
+		products
+		WHERE
+		upper(product_name) LIKE upper("%"#{input}"%")
+	</select>
+</mapper>

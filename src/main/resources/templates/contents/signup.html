@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible">
+  <title>AdminLTE 3 | Registration Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" th:href="@{https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css}">
+  <link rel="stylesheet" th:href="@{https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700}">   
+  <link rel="stylesheet" th:href="@{/adminlte/plugins/fontawesome-free/css/all.min.css}">
+  <link rel="stylesheet" th:href="@{/adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/adminlte/dist/css/adminlte.min.css}">
+  
+  <script src="/adminlte/plugins/jquery/jquery.min.js"></script>
+  <script src="/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="/adminlte/dist/js/adminlte.min.js"></script>
+</head>
+<body class="hold-transition register-page">
+<div class="register-box">
+  <div class="register-logo">
+    <a th:href="@{/}"><b>Store</b>Manager</a>
+  </div>
+
+  <div class="card">
+    <div class="card-body register-card-body">
+      <p class="login-box-msg">Sign up a new membership</p>
+
+	<form th:action="@{/user/signup}" th:object="${userVo}" method="POST">
+		<div class="mb-3">
+          <div class="input-group">
+            <input type="text" class="form-control" name="username" th:value="${userVo.username}"
+			  th:field="*{username}" placeholder="username(login id)" required> 
+            <div class="input-group-append">
+              <div class="input-group-text">
+                <span class="fas fa-user"></span>
+              </div>
+            </div>
+          </div>
+          <span style="color: #990000;" th:text="${username}"></span>
+        </div>
+        
+        <div class="mb-3">
+          <div class="input-group">
+            <input type="password" class="form-control" name="password" th:field="*{password}" 
+             placeholder="password(8~15자의 특수문자와+문자)" required> 
+            <div class="input-group-append">
+              <div class="input-group-text">
+                <span class="fas fa-lock"></span>
+              </div>
+            </div>
+          </div>
+          <span style="color: #990000;" th:if="${#fields.hasErrors('password')}" 
+            th:errors="*{password}"></span>
+        </div>
+        
+        <div class="mb-3">
+          <div class="input-group">
+            <input type="email" class="form-control" name="email" th:value="${userVo.email}"
+		  	  th:field="*{email}" placeholder="email" required> 
+            <div class="input-group-append">
+              <div class="input-group-text">
+                <span class="fas fa-envelope"></span>
+              </div>
+            </div>
+          </div>
+		  <span style="color: #990000;" th:text="${email}"></span>
+        </div>
+        
+        <div class="mb-3">
+          <div class="input-group">
+            <input type="text" class="form-control" name="name" th:value="${userVo.name}" 
+             th:field="*{name}" placeholder="name(real name)" required>
+            <div class="input-group-append">
+              <div class="input-group-text">
+                <span class="fas fa-lock"></span>
+              </div>
+            </div>
+          </div>
+		  <span style="color: #990000;" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+        </div>
+        
+        <div class="mb-3">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" name="branch" th:field="*{branch}" 
+             placeholder="지점명(정확하게 입력)" required> 
+            <div class="input-group-append">
+              <div class="input-group-text">
+                <span class="fas fa-lock"></span>
+              </div>
+            </div>
+          </div>
+          <span style="color: #990000;" th:if="${#fields.hasErrors('branch')}" th:errors="*{branch}"></span>
+		</div>
+        <div class="row">
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary btn-block">SignUp</button>
+          </div>
+        </div>
+    </form>
+	   <div style="text-align: right;">
+         <a href="logisn.html" class="mb-1" style="font-size: 13px;">Sign in</a>
+         <p class="mb-1" style="font-size: 10px;">
+           <a href="#">이용약관</a>
+         </p>
+       </div>
+    </div>
+    <!-- /.form-box -->
+  </div><!-- /.card -->
+</div>
+
+</body>
+</html>

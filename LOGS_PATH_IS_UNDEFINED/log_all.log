@@ -1,0 +1,6 @@
+[2020-08-20 07:23:36:419] [INFO ] c.h.web.BootSecurityApplication --> Starting BootSecurityApplication on DESKTOP-D1J53EB with PID 13132 (C:\Dev\springDev\store_manager\target\classes started by admin in C:\Dev\springDev\store_manager)
+[2020-08-20 07:23:36:424] [INFO ] c.h.web.BootSecurityApplication --> No active profile set, falling back to default profiles: default
+[2020-08-20 07:23:40:4182] [INFO ] c.h.web.BootSecurityApplication --> Started BootSecurityApplication in 4.039 seconds (JVM running for 4.706)
+[2020-08-20 07:23:43:7962] [INFO ] c.h.web.BootSecurityApplication --> Starting BootSecurityApplication on DESKTOP-D1J53EB with PID 13132 (C:\Dev\springDev\store_manager\target\classes started by admin in C:\Dev\springDev\store_manager)
+[2020-08-20 07:23:43:7962] [INFO ] c.h.web.BootSecurityApplication --> No active profile set, falling back to default profiles: default
+[2020-08-20 07:23:45:9438] [INFO ] c.h.web.BootSecurityApplication --> Started BootSecurityApplication in 1.508 seconds (JVM running for 9.961)

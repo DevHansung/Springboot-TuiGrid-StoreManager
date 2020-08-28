@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hansung.web.mapper.StockMapper">
+	<select id="findStocks"
+		resultType="com.hansung.web.vo.StockVo">
+		SELECT
+		s.stock_seq AS stockSeq,
+		s.product_code AS productCode,
+		s.product_name AS productName,
+		s.product_type AS productType,
+		s.product_color AS productColor,
+		s.product_size AS productSize,
+		s.order_total_quantity AS orderTotalQuantity,
+		s.sales_total_quantity AS salesTotalQuantity,
+		s.stock_total_quantity AS stockTotalQuantity,
+		s.sales_rate AS salesRate,
+		s.stock_branch AS stockBranch
+		FROM stocks AS s
+		WHERE stock_branch = #{currentBranch} AND 
+		DATE(stock_date) >= DATE_SUB(now(), INTERVAL 3 MONTH)
+		ORDER BY s.stock_seq DESC
+	</select>
+	
+	<select id="getStockTotalQuantityByproductCodeAndBranch" parameterType="java.util.Map"
+		resultType="int">
+		SELECT 
+		stock_total_quantity 
+		FROM stocks 
+		WHERE product_code = #{productCode} 
+		AND stock_branch = #{currentBranch}
+	</select>
+		
+	<select id="searchStockByProductCode" parameterType="java.util.Map"
+		resultType="com.hansung.web.vo.StockVo">
+		SELECT
+		s.stock_seq AS stockSeq,
+		s.product_code AS productCode,
+		s.product_name AS productName,
+		s.product_type AS productType,
+		s.product_color AS productColor,
+		s.product_size AS productSize,
+		s.order_total_quantity AS orderTotalQuantity,
+		s.sales_total_quantity AS salesTotalQuantity,
+		s.stock_total_quantity AS stocksTotalQuantity,
+		s.sales_rate AS salesRate,
+		s.stock_branch AS stockBranch
+		FROM stocks s
+		WHERE s.product_code = #{productCode}
+		and stock_branch=#{currentBranch}
+	</select>
+
+	<select id="searchStockByProductName" parameterType="java.util.Map"
+		resultType="com.hansung.web.vo.StockVo">
+		SELECT
+		s.stock_seq AS stockSeq,
+		s.product_code AS productCode,
+		s.product_name AS productName,
+		s.product_type AS productType,
+		s.product_color AS productColor,
+		s.product_size AS productSize,
+		s.order_total_quantity AS orderTotalQuantity,
+		s.sales_total_quantity AS salesTotalQuantity,
+		s.stock_total_quantity AS stocksTotalQuantity,
+		s.sales_rate AS salesRate,
+		s.stock_branch AS stockBranch
+		FROM stocks s
+		WHERE s.product_name = #{productName}
+		and stock_branch=#{currentBranch}
+	</select>
+	
+	<select id="searchStockByDate" parameterType="java.util.Map"
+		resultType="com.hansung.web.vo.StockVo">
+		SELECT
+		s.stock_seq AS stockSeq,
+		s.product_code AS productCode,
+		s.product_name AS productName,
+		s.product_type AS productType,
+		s.product_color AS productColor,
+		s.product_size AS productSize,
+		s.order_total_quantity AS orderTotalQuantity,
+		s.sales_total_quantity AS salesTotalQuantity,
+		s.stock_total_quantity AS stocksTotalQuantity,
+		s.sales_rate AS salesRate,
+		s.stock_branch AS stockBranch
+		FROM stocks s
+		WHERE DATE(s.stock_date) BETWEEN #{endDate} AND #{startDate}
+		and stock_branch=#{currentBranch}
+	</select>
+	
+	<select id="autoCompleteStockByProductCode" parameterType="java.util.Map"
+		resultType="String">
+		SELECT
+		product_code
+		FROM
+		stocks
+		WHERE
+		upper(product_code) LIKE upper("%"#{input}"%")
+		and stock_branch=#{currentBranch}
+	</select>
+	
+	<select id="autoCompleteStockByProductName" parameterType="java.util.Map"
+		resultType="String">
+		SELECT
+		product_name
+		FROM
+		stocks
+		WHERE
+		upper(product_name) LIKE upper("%"#{input}"%")
+		and stock_branch=#{currentBranch}
+	</select>
+</mapper>
+

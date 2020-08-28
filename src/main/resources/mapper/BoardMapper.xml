@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hansung.web.mapper.BoardMapper">
+	<select id="getBoardCount" parameterType="int" resultType="int">
+		SELECT count(board_num) FROM board
+	</select>
+	
+	<!-- 페이징처리 조회 -->
+	<select id="getBoardListPaging" parameterType="hashMap"
+		resultType="com.hansung.web.vo.BoardVo">
+		SELECT
+		b.board_num AS boardNum, 
+		b.board_title AS boardTitle, 
+		b.board_text AS boardText, 
+		b.board_writer AS boardWriter, 
+		b.board_branch AS boardBranch, 
+		b.board_date AS boardDate, 
+		b.board_count AS boardCount
+		FROM board b
+		ORDER BY b.board_num ASC
+		LIMIT #{displayPost}, #{postNum}
+	</select>
+		
+	<select id="getBoardByBoardNum" resultType="com.hansung.web.vo.BoardVo">
+		SELECT
+		b.board_num AS boardNum, 
+		b.board_title AS boardTitle, 
+		b.board_text AS boardText, 
+		b.board_writer AS boardWriter, 
+		b.board_branch AS boardBranch, 
+		b.board_date AS boardDate, 
+		b.board_count AS boardCount
+		FROM board b
+		WHERE b.board_num = #{boardNum}
+	</select>
+	
+	<insert id="insertBoard" parameterType="com.hansung.web.vo.BoardVo">
+		INSERT INTO 
+		board(board_title, board_text, board_writer, board_branch)
+		VALUES(#{boardTitle}, #{boardText}, #{boardWriter}, #{boardBranch})
+	</insert>
+	
+	<update id="updateBoard" parameterType="com.hansung.web.vo.BoardVo">
+		UPDATE board
+		SET 
+		board_title = #{boardTitle},
+		board_text = #{boardText}
+		WHERE board_num = #{boardNum}
+	</update>
+		
+	<delete id="deleteBoardByBoardNum">
+		DELETE
+		FROM board 
+		WHERE board_num = #{boardNum}
+	</delete>
+	
+	<!-- 조회수 -->
+	<update id="updateBoardViewCount">
+		UPDATE board
+		SET board_count = board_count + 1
+		WHERE board_num = #{boardNum}
+	</update>
+</mapper>

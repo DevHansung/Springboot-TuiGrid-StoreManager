@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hansung.web.mapper.UserManagementMapper">
+	<select id="getUserCount" parameterType="int" resultType="int">
+		select count(user_id) from user
+	</select>
+	
+	<!-- 페이징처리해서 조회 -->
+	<select id="getUserListPaging" parameterType="hashMap"
+		resultType="com.hansung.web.vo.UserVo">
+		select
+		u.user_id AS userId, 
+		u.username AS userName, 
+		u.name AS name, 
+		u.email AS email, 
+		u.branch AS branch, 
+		u.enabled AS enabled,
+        r.role_name AS roleName
+		from user u
+        left outer join user_role ur on u.user_id =ur.user_id
+        left outer join role r on r.role_id =ur.role_id
+		order by u.user_id asc
+		limit #{displayPost}, #{postNum}
+	</select>
+
+	<select id="changeEnabled" parameterType="hashMap">
+		update user set enabled=#{changeEnabled} where user_id=#{userId};
+	</select>
+	
+	<select id="changeRole" parameterType="hashMap">
+		update user_role
+		set role_id = (select role_id from role where role_name=#{changeRole})
+		where user_id=#{userId};
+	</select>
+</mapper>

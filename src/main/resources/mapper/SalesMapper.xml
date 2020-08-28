@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hansung.web.mapper.SalesMapper">
+	<!-- sales start-->
+	<insert id="insertSales" parameterType="java.util.List">
+		INSERT INTO
+		sales
+		(product_code, product_name, product_type,
+		product_color, product_size, product_selling_price,
+		sales_quantity, sales_price, sales_state, sales_branch)
+		VALUES
+		<foreach collection="list" item="item" separator=",">
+			(#{item.productCode}, #{item.productName}, #{item.productType},
+			#{item.productColor}, #{item.productSize}, #{item.productSellingPrice},
+			#{item.salesQuantity}, #{item.salesPrice}, #{item.salesState}, #{item.salesBranch})
+		</foreach>
+	</insert>
+	
+	<select id="searchProductByProductCode" parameterType="java.util.Map"
+		resultType="com.hansung.web.vo.SalesVo">
+		SELECT
+		s.product_code AS productCode,
+		s.product_name AS productName,
+		s.product_type AS productType,
+		s.product_color AS productColor,
+		s.product_size AS productSize,
+		s.product_selling_price AS productSellingPrice
+		FROM stocks AS s WHERE
+		s.product_code = #{productCode} AND
+		s.stock_branch = #{currentBranch}
+	</select>
+
+	<select id="searchProductByProductName" parameterType="java.util.Map"
+		resultType="com.hansung.web.vo.SalesVo">
+		SELECT
+		s.product_code AS productCode,
+		s.product_name AS productName,
+		s.product_type AS productType,
+		s.product_color AS productColor,
+		s.product_size AS productSize,
+		s.product_selling_price AS productSellingPrice
+		FROM stocks AS s WHERE
+		s.product_code = #{productName} AND
+		s.stock_branch = #{currentBranch}
+	</select>
+	
+	<select id="autoCompleteSalesByProductCode" parameterType="java.util.Map"
+		resultType="String">
+		SELECT
+		product_code
+		FROM
+		stocks
+		WHERE stock_branch = #{currentBranch} AND
+		upper(product_code) LIKE upper("%"#{input}"%")
+	</select>
+	
+	<select id="autoCompleteSalesByProductName" parameterType="java.util.Map"
+		resultType="String">
+		SELECT
+		product_name
+		FROM
+		stocks
+		WHERE stock_branch = #{currentBranch} AND
+		upper(product_name) LIKE upper("%"#{input}"%")
+	</select>
+	<!-- sales end-->
+
+	<!-- salesManagement start-->
+	<select id="findSales" resultType="com.hansung.web.vo.SalesVo">
+		SELECT
+		s.sales_seq AS salesSeq,
+		s.product_code AS productCode,
+		s.product_name AS productName,
+		s.product_type AS productType,
+		s.product_color AS productColor,
+		s.product_size AS productSize,
+		s.product_selling_price AS productSellingPrice,
+		s.sales_quantity AS salesQuantity,
+		s.sales_price AS salesPrice,
+		s.sales_state AS salesState,
+		s.sales_branch AS salesBranch,
+		s.sales_date AS salesDate
+		FROM sales s WHERE sales_branch=#{currentBranch} and
+		DATE(sales_date) >= DATE_SUB(now(), INTERVAL 3 MONTH)
+	</select>
+
+	<select id="getSalesQuantityBySalesSeq" resultType="int">
+		SELECT 
+		sales_quantity 
+		FROM sales 
+		WHERE sales_seq = #{salesSeq} 
+	</select>
+	
+	<delete id="deleteSales" parameterType="java.util.List">
+		DELETE FROM sales
+		WHERE
+		<foreach collection="list" item="item" separator="or"
+			index="index">
+			sales_seq = #{item.salesSeq}
+		</foreach>
+	</delete>
+		
+	<update id="updateSales" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index"
+			separator=";">
+			UPDATE sales
+			SET 
+			product_selling_price = #{item.productSellingPrice},
+			sales_quantity = #{item.salesQuantity},
+			sales_price = #{item.salesPrice},
+			sales_state = #{item.salesState}
+			WHERE sales_seq = #{item.salesSeq}
+		</foreach>
+		;
+	</update>
+	
+	<select id="searchSalesManagementByProductCode" parameterType="java.util.Map"
+		resultType="com.hansung.web.vo.SalesVo">
+		SELECT
+		s.sales_seq AS salesSeq,
+		s.product_code AS productCode,
+		s.product_name AS productName,
+		s.product_type AS productType,
+		s.product_color AS productColor,
+		s.product_size AS productSize,
+		s.product_selling_price AS productSellingPrice,
+		s.sales_quantity AS salesQuantity,
+		s.sales_price AS salesPrice,
+		s.sales_state AS salesState,
+		s.sales_branch AS salesBranch,
+		s.sales_date AS salesDate
+		FROM sales s
+		WHERE s.product_code = #{productCode}
+		and sales_branch=#{currentBranch}
+	</select>
+
+	<select id="searchSalesManagementByProductName" parameterType="java.util.Map"
+		resultType="com.hansung.web.vo.SalesVo">
+		SELECT
+		s.sales_seq AS salesSeq,
+		s.product_code AS productCode,
+		s.product_name AS productName,
+		s.product_type AS productType,
+		s.product_color AS productColor,
+		s.product_size AS productSize,
+		s.product_selling_price AS productSellingPrice,
+		s.sales_quantity AS salesQuantity,
+		s.sales_price AS salesPrice,
+		s.sales_state AS salesState,
+		s.sales_branch AS salesBranch,
+		s.sales_date AS salesDate
+		FROM sales s
+		WHERE s.product_name = #{productName}
+		and sales_branch=#{currentBranch}
+	</select>
+	
+	<select id="searchSalesManagementByDate" parameterType="java.util.Map"
+		resultType="com.hansung.web.vo.SalesVo">
+		SELECT
+		s.sales_seq AS salesSeq,
+		s.product_code AS productCode,
+		s.product_name AS productName,
+		s.product_type AS productType,
+		s.product_color AS productColor,
+		s.product_size AS productSize,
+		s.product_selling_price AS productSellingPrice,
+		s.sales_quantity AS salesQuantity,
+		s.sales_price AS salesPrice,
+		s.sales_state AS salesState,
+		s.sales_branch AS salesBranch,
+		s.sales_date AS salesDate
+		FROM sales s
+		WHERE DATE(s.sales_date) BETWEEN #{endDate} AND #{startDate}
+		and sales_branch=#{currentBranch}
+	</select>
+	
+	<select id="autoCompleteSalesManagementByProductCode" parameterType="java.util.Map"
+		resultType="String">
+		SELECT
+		product_code
+		FROM
+		sales
+		WHERE
+		upper(product_code) LIKE upper("%"#{input}"%")
+		and sales_branch=#{currentBranch}
+	</select>
+	
+	<select id="autoCompleteSalesManagementByProductName" parameterType="java.util.Map"
+		resultType="String">
+		SELECT
+		product_name
+		FROM
+		sales
+		WHERE
+		upper(product_name) LIKE upper("%"#{input}"%")
+		and sales_branch=#{currentBranch}
+	</select>
+	<!-- salesManagement end-->
+</mapper>
